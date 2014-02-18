@@ -4,14 +4,14 @@ import (
     "github.com/codegangsta/martini"
 )
 
-func hello() (int, string) {
-    return 200, "Hello, world!"
-}
-
 func Build() (*martini.ClassicMartini) {
     m := martini.Classic()
 
-    m.Get("/", hello)
+    m.Get("/", Nop)
+    m.Get("/poll", Nop)
+
+    UserRoute(m)
+    TRoute(m)
 
     return m
 }
