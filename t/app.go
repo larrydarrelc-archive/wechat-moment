@@ -1,17 +1,17 @@
-package main
+package t
 
 import (
     "github.com/codegangsta/martini"
 )
 
 func hello() (int, string) {
-    return 404, "Hello, world!"
+    return 200, "Hello, world!"
 }
 
-func main() {
+func Build() (*martini.ClassicMartini) {
     m := martini.Classic()
 
     m.Get("/", hello)
 
-    m.Run()
+    return m
 }
