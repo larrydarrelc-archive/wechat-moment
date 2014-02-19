@@ -19,6 +19,11 @@ func prepareDatabase(m *martini.ClassicMartini, config *Configs) {
     orm.RegisterDataBase("default", "sqlite3", dbPath)
 }
 
+func prepareMiddlewares(m *martini.ClassicMartini, config *Configs) {
+    m.Use(render.Renderer())
+    m.Use(martini.Recovery())
+}
+
 func prepareViews(m *martini.ClassicMartini, config *Configs) {
     m.Get("/", Nop)
 
@@ -35,11 +40,10 @@ func prepareModels(m *martini.ClassicMartini, config *Configs) {
 func Build(config *Configs) (*martini.ClassicMartini) {
     m := martini.Classic()
 
-    m.Use(render.Renderer())
-    m.Use(martini.Recovery())
-    prepareViews(m, config)
     prepareDatabase(m, config)
     prepareModels(m, config)
+    prepareMiddlewares(m, config)
+    prepareViews(m, config)
 
     return m
 }
