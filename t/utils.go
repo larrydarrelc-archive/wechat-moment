@@ -9,6 +9,7 @@ import (
 
 type Delim string
 
+// Join []string with delimiter.
 func (delim Delim) Join(components []string) (joined string) {
     joined = ""
     delim_ := string(delim)
@@ -29,12 +30,14 @@ func Nop() (int, string) {
     return 200, "Hello, world!"
 }
 
+// Generate error message.
 func Error(reason string) (map[string]string) {
     return map[string]string {
         "error": reason,
     }
 }
 
+// Generate success message.
 func Success(reason string) (map[string]string) {
     return map[string]string {
         "message": reason,

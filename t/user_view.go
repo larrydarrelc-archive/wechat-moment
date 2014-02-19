@@ -2,6 +2,7 @@ package t
 
 import (
     "fmt"
+    "log"
     "net/http"
     "strconv"
     "github.com/codegangsta/martini"
@@ -52,7 +53,9 @@ func createUser(req *http.Request, r render.Render) {
     user := User{Login: login}
     created, _, err := o.ReadOrCreate(&user, "Login");
     if err != nil {
-        panic(err)
+        log.Fatal("Read user failed", user.Login, err)
+        r.JSON(http.StatusForbidden, Error("Create user failed."))
+        return
     }
     if !created {
         r.JSON(http.StatusConflict,
@@ -63,7 +66,9 @@ func createUser(req *http.Request, r render.Render) {
     user.Password = user.HashPassword(password)
     user.Name = name
     if _, err := o.Update(&user); err != nil {
-        panic(err)
+        log.Fatal("Create user failed.", user.Name, user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Create user failed."))
+        return
     }
     r.JSON(http.StatusCreated, map[string]interface{} {
         "Id": user.Id,
@@ -76,7 +81,9 @@ func getUserProfile(params martini.Params, r render.Render) {
 
     id, err := strconv.Atoi(params["id"])
     if err != nil {
-        panic(err)
+        log.Fatal("Cannot parse into `int`.", params["id"], err)
+        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        return
     }
     user := User{Id: id}
     err = o.Read(&user)
@@ -109,7 +116,9 @@ func updateUserProfile(req *http.Request, params martini.Params, r render.Render
     user.Name = name
     _, err = o.Update(&user)
     if err != nil {
-        panic(err)
+        log.Fatal("Update user profile failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Update user profile failed."))
+        return
     }
     r.JSON(http.StatusNoContent, "")
 }
@@ -125,12 +134,16 @@ func loginUser(req *http.Request, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Name and password are mismatch!"))
         return
     } else if err != nil {
-        panic(err)
+        log.Fatal("Read user failed.", err)
+        r.JSON(http.StatusForbidden, Error("Login failed."))
+        return
     }
 
     token, err := user.DoLogin()
     if err != nil {
-        panic(err)
+        log.Fatal("User login failed.", err)
+        r.JSON(http.StatusForbidden, Error("Login failed."))
+        return
     }
 
     r.JSON(http.StatusOK, map[string]interface{} {
@@ -139,8 +152,10 @@ func loginUser(req *http.Request, r render.Render) {
     return
 }
 
-func logoutUser(user *User) {
+func logoutUser(user *User, r render.Render) {
     if err := user.DoLogout(); err != nil {
-        panic(err)
+        log.Fatal("User logout failed.", err)
+        r.JSON(http.StatusForbidden, Error("Logout failed."))
+        return
     }
 }
