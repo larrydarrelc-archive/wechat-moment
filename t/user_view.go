@@ -1,7 +1,12 @@
 package t
 
 import (
+    "fmt"
+    "net/http"
+    "strconv"
     "github.com/codegangsta/martini"
+    "github.com/codegangsta/martini-contrib/render"
+    "github.com/astaxie/beego/orm"
 )
 
 // Routes:

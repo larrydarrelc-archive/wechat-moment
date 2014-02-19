@@ -1,7 +1,11 @@
 package t
 
 import (
+    "path/filepath"
+    "github.com/astaxie/beego/orm"
+    _ "github.com/mattn/go-sqlite3"
     "github.com/codegangsta/martini"
+    "github.com/codegangsta/martini-contrib/render"
 )
 
 func prepareDatabase(m *martini.ClassicMartini, config *Configs) {
