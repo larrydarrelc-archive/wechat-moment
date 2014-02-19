@@ -1,0 +1,6 @@
+{
+    "Db": "data/data.sqlite3",
+    
+    "Port": 5678,
+    "Host": "127.0.0.1"
+}
