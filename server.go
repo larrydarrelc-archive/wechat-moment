@@ -5,7 +5,12 @@ import (
 )
 
 func main() {
-    m := t.Build()
+    config := t.ReadConfigs("configs/default.json")
+    m := t.Build(config)
 
-    m.Run()
+    dest := fmt.Sprintf("%s:%d", config.Host, config.Port)
+    err := http.ListenAndServe(dest, m)
+    if err != nil {
+        panic(err)
+    }
 }
