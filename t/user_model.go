@@ -69,3 +69,14 @@ func (u *User) CheckLogin(token string) (bool, error) {
 
     return code == token, nil
 }
+
+// Hide some secret field.
+func (u User) Censor() (map[string]interface{}) {
+    return map[string]interface{} {
+        "Id": u.Id,
+        "Name": u.Name,
+        "Avatar": u.Avatar,
+        "CreatedAt": u.CreatedAt,
+        "UpdatedAt": u.UpdatedAt,
+    }
+}

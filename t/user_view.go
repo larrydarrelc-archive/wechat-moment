@@ -85,8 +85,7 @@ func getUserProfile(params martini.Params, r render.Render) {
                Error(fmt.Sprintf("User %d not exists", id)))
         return
     }
-    user.Password = ""
-    r.JSON(http.StatusOK, user)
+    r.JSON(http.StatusOK, user.Censor())
 }
 
 func updateUserProfile(req *http.Request, params martini.Params, r render.Render) {
