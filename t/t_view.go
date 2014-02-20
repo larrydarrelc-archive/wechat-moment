@@ -71,13 +71,19 @@ func createTweet(req *http.Request, u *User, r render.Render) {
 
     o := orm.NewOrm()
     tweet := Tweet {UserId: u.Id, Text: text}
-    _, err := o.Insert(tweet)
+    _, err := o.Insert(&tweet)
     if err != nil {
         log.Print("Tweet create failed.", u.Id, text, err)
         r.JSON(http.StatusForbidden, Error("Tweet create failed."))
         return
     }
-    r.JSON(http.StatusCreated, tweet)
+    rv, err := tweet.Censor()
+    if err != nil {
+        log.Print("Tweet create failed.", u.Id, text, err)
+        r.JSON(http.StatusForbidden, Error("Tweet create failed."))
+        return
+    }
+    r.JSON(http.StatusCreated, rv)
 }
 
 func deleteTweet(tweet *Tweet, u *User, r render.Render) {
