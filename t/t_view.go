@@ -17,7 +17,6 @@ import (
 //  /t/:id          GET     Get a status.
 //  /t/:id          DELETE  Delete a status.
 //  /t/:id/like     PUT     Like a status
-//  /t/:id/comment  GET     Get a status' comments
 //  /t/:id/comment  POST    Create a comment for status `:id`
 func TRoute(m *martini.ClassicMartini) {
     m.Get("/t", LoginRequired, getTimeline)
