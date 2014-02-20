@@ -53,7 +53,7 @@ func createUser(req *http.Request, r render.Render) {
     user := User{Login: login}
     created, _, err := o.ReadOrCreate(&user, "Login");
     if err != nil {
-        log.Fatal("Read user failed", user.Login, err)
+        log.Print("Read user failed", user.Login, err)
         r.JSON(http.StatusForbidden, Error("Create user failed."))
         return
     }
@@ -66,7 +66,7 @@ func createUser(req *http.Request, r render.Render) {
     user.Password = user.HashPassword(password)
     user.Name = name
     if _, err := o.Update(&user); err != nil {
-        log.Fatal("Create user failed.", user.Name, user.Id, err)
+        log.Print("Create user failed.", user.Name, user.Id, err)
         r.JSON(http.StatusForbidden, Error("Create user failed."))
         return
     }
@@ -81,7 +81,7 @@ func getUserProfile(params martini.Params, r render.Render) {
 
     id, err := strconv.Atoi(params["id"])
     if err != nil {
-        log.Fatal("Cannot parse into `int`.", params["id"], err)
+        log.Print("Cannot parse into `int`.", params["id"], err)
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
     }
@@ -94,7 +94,7 @@ func getUserProfile(params martini.Params, r render.Render) {
     }
     rv, err := user.Censor()
     if err != nil {
-        log.Fatal("User censor failed.", err, id)
+        log.Print("User censor failed.", err, id)
     }
 
     r.JSON(http.StatusOK, rv)
@@ -121,7 +121,7 @@ func updateUserProfile(req *http.Request, params martini.Params, r render.Render
     user.Name = name
     _, err = o.Update(&user)
     if err != nil {
-        log.Fatal("Update user profile failed.", user.Id, err)
+        log.Print("Update user profile failed.", user.Id, err)
         r.JSON(http.StatusForbidden, Error("Update user profile failed."))
         return
     }
@@ -139,14 +139,14 @@ func loginUser(req *http.Request, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Name and password are mismatch!"))
         return
     } else if err != nil {
-        log.Fatal("Read user failed.", err)
+        log.Print("Read user failed.", err)
         r.JSON(http.StatusForbidden, Error("Login failed."))
         return
     }
 
     token, err := user.DoLogin()
     if err != nil {
-        log.Fatal("User login failed.", err)
+        log.Print("User login failed.", err)
         r.JSON(http.StatusForbidden, Error("Login failed."))
         return
     }
@@ -159,7 +159,7 @@ func loginUser(req *http.Request, r render.Render) {
 
 func logoutUser(user *User, r render.Render) {
     if err := user.DoLogout(); err != nil {
-        log.Fatal("User logout failed.", err)
+        log.Print("User logout failed.", err)
         r.JSON(http.StatusForbidden, Error("Logout failed."))
         return
     }
@@ -177,7 +177,7 @@ func LoginRequired(req *http.Request, c martini.Context, r render.Render) {
 
     id, err := strconv.Atoi(req.Header.Get("X-ID"))
     if err != nil {
-        log.Fatal("X-ID cannot be parsed into `int`.", req.Header.Get("X-ID"), err)
+        log.Print("X-ID cannot be parsed into `int`.", req.Header.Get("X-ID"), err)
         banAccess()
         return
     }
@@ -186,7 +186,7 @@ func LoginRequired(req *http.Request, c martini.Context, r render.Render) {
     user := User{Id: id}
     ok, err := user.CheckLogin(token)
     if err != nil {
-        log.Fatal("User check login failed.", id, token, err)
+        log.Print("User check login failed.", id, token, err)
         banAccess()
         return
     }
@@ -199,7 +199,7 @@ func LoginRequired(req *http.Request, c martini.Context, r render.Render) {
     // Map logined user into request context.
     err = orm.NewOrm().Read(&user)
     if err != nil {
-        log.Fatal("Read user failed.", id, err)
+        log.Print("Read user failed.", id, err)
         banAccess()
         return
     }
