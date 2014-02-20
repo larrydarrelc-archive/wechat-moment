@@ -110,6 +110,42 @@ func (t *Tweet) GetLike() (rv []TypeModel, err error) {
     return rv, nil
 }
 
+func (t *Tweet) Delete() (err error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("DELETE FROM `t_comment` WHERE `t_id` = ?", t.Id)
+    _, err = stat.Exec()
+    if err != nil {
+        return err
+    }
+
+    stat = o.Raw("DELETE FROM `t_like` WHERE `t_id` = ?", t.Id)
+    _, err = stat.Exec()
+    if err != nil {
+        return err
+    }
+
+    stat = o.Raw("DELETE FROM `t` WHERE `id` = ?", t.Id)
+    _, err = stat.Exec()
+    if err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func GetTweetById(id int) (t *Tweet, err error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("SELECT * FROM `t` WHERE `id` = ?", id)
+    err = stat.QueryRow(&t)
+    if err != nil {
+        return nil, err
+    }
+
+    return t, nil
+}
+
 type TweetComment struct {
     Id int `orm:"auto"`
     TweetId int
