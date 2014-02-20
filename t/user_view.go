@@ -70,10 +70,13 @@ func createUser(req *http.Request, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Create user failed."))
         return
     }
-    r.JSON(http.StatusCreated, map[string]interface{} {
-        "Id": user.Id,
-        "Login": user.Login,
-    })
+    rv, err := user.Censor()
+    if err != nil {
+        log.Print("Censor user failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Create user failed."))
+        return
+    }
+    r.JSON(http.StatusCreated, rv)
 }
 
 func getUserProfile(params martini.Params, r render.Render) {
