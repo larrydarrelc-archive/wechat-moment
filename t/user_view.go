@@ -85,7 +85,7 @@ func getUserProfile(params martini.Params, r render.Render) {
     id, err := strconv.Atoi(params["id"])
     if err != nil {
         log.Print("Cannot parse into `int`.", params["id"], err)
-        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        r.JSON(http.StatusNotFound, Error("Read user profile failed."))
         return
     }
     user := User{Id: id}
