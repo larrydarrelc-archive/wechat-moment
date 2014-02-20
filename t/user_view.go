@@ -14,17 +14,17 @@ import (
 //
 //  Path            Method  Description
 //  /user           POST    Create a user.
+//  /user           PUT     Update user's profile.
 //  /user/login     POST    Login a user.
 //  /user/logout    GET     Logout a user.
 //  /user/:id       GET     Get user `/:id`'s profile.
-//  /user/:id       PUT     Update user's profile.
 func UserRoute(m *martini.ClassicMartini) {
     m.Post("/user", createUser)
+    m.Put("/user", LoginRequired, updateUserProfile)
     m.Post("/user/login", loginUser)
     m.Get("/user/logout", LoginRequired, logoutUser)
 
     m.Get("/user/:id", LoginRequired, getUserProfile)
-    m.Put("/user/:id", LoginRequired, updateUserProfile)
 }
 
 // Create a user.
@@ -103,26 +103,9 @@ func getUserProfile(params martini.Params, r render.Render) {
     r.JSON(http.StatusOK, rv)
 }
 
-func updateUserProfile(req *http.Request, params martini.Params, r render.Render) {
-    o := orm.NewOrm()
-
-    id, err := strconv.Atoi(params["id"])
-    if err != nil {
-        r.JSON(http.StatusNotFound,
-               Error(fmt.Sprintf("User %s not exists", params["id"])))
-        return
-    }
-    user := User{Id: id}
-    err = o.Read(&user)
-    if err == orm.ErrNoRows {
-        r.JSON(http.StatusNotFound,
-               Error(fmt.Sprintf("User %d not exists", id)))
-        return
-    }
-
+func updateUserProfile(user *User, req *http.Request, r render.Render) {
     name := req.FormValue("name")
-    user.Name = name
-    _, err = o.Update(&user)
+    err := user.UpdateProfile(name)
     if err != nil {
         log.Print("Update user profile failed.", user.Id, err)
         r.JSON(http.StatusForbidden, Error("Update user profile failed."))

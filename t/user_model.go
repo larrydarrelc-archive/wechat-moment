@@ -80,6 +80,14 @@ func (u User) Censor() (TypeModel, error) {
     }, nil
 }
 
+func (u *User) UpdateProfile(name string) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("UPDATE `user` SET `name` = ? WHERE `id` = ?", name, u.Id)
+    _, err := stat.Exec()
+    return err
+}
+
 func GetUserById(id int) (user *User, err error) {
     o := orm.NewOrm()
 
