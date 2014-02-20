@@ -111,19 +111,19 @@ func likeTweet(tweet *Tweet, u *User, r render.Render) {
         return
     }
     if like {
-        if err = tweet.Like(u); err != nil {
-            log.Print("Like tweet failed.", tweet.Id, u.Id, err)
-            r.JSON(http.StatusForbidden, Error("Like tweet failed."))
-            return
-        }
-        log.Print("Tweet was liked.", tweet.Id, u.Id)
-    } else {
         if err = tweet.UnLike(u); err != nil {
             log.Print("Unlike tweet failed.", tweet.Id, u.Id, err)
             r.JSON(http.StatusForbidden, Error("Unlike tweet failed."))
             return
         }
         log.Print("Tweet was unliked.", tweet.Id, u.Id)
+    } else {
+        if err = tweet.Like(u); err != nil {
+            log.Print("Like tweet failed.", tweet.Id, u.Id, err)
+            r.JSON(http.StatusForbidden, Error("Like tweet failed."))
+            return
+        }
+        log.Print("Tweet was liked.", tweet.Id, u.Id)
     }
 
     r.JSON(http.StatusNoContent, "")
