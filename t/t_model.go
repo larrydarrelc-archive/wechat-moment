@@ -134,6 +134,54 @@ func (t *Tweet) Delete() (err error) {
     return nil
 }
 
+func (t *Tweet) IsLike(u *User) (bool, error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw(
+        "SELECT COUNT(*) FROM `t_like` WHERE `t_id` = ? AND `user_id` = ?",
+        t.Id, u.Id,
+    )
+    var count int
+    err := stat.QueryRow(&count)
+    if err != nil {
+        return false, err
+    }
+    return count > 0, nil
+}
+
+func (t *Tweet) Like(u *User) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw(
+        "INSERT INTO `t_like` (`t_id`, `user_id`) VALUES (?, ?)",
+        t.Id, u.Id,
+    )
+    _, err := stat.Exec()
+    return err
+}
+
+func (t *Tweet) UnLike(u *User) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw(
+        "DELETE FROM `t_like` WHERE `t_id` = ? AND `user_id` = ?",
+        t.Id, u.Id,
+    )
+    _, err := stat.Exec()
+    return err
+}
+
+func (t *Tweet) CreateComment(content string, user *User) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw(
+        "INSERT INTO `t_comment` (`t_id`, `user_id`, `content`) VALUES (?, ?, ?)",
+        t.Id, user.Id, content,
+    )
+    _, err := stat.Exec()
+    return err
+}
+
 func GetTweetById(id int) (t *Tweet, err error) {
     o := orm.NewOrm()
 
