@@ -3,7 +3,6 @@ package t
 import (
     "fmt"
     "time"
-    "log"
     "github.com/astaxie/beego/orm"
 )
 
@@ -31,13 +30,11 @@ func (u *User) DoLogin() (string, error) {
     token := u.GenerateToken()
     stat, err := o.Raw("INSERT INTO `token` (`code`, `user_id`) VALUES (?, ?)").Prepare()
     if err != nil {
-        log.Print("Prepare sql statments failed.", u.Id, token)
         return "", err
     }
     defer stat.Close()
     _, err = stat.Exec(token, u.Id)
     if err != nil {
-        log.Print("Exec sql failed.", u.Id, token, stat)
         return "", err
     }
     return token, nil
@@ -48,13 +45,11 @@ func (u *User) DoLogout() (error) {
 
     stat, err := o.Raw("DELETE FROM `token` WHERE `user_id` = ?").Prepare()
     if err != nil {
-        log.Print("Prepare sql statments failed", u.Id)
         return err
     }
     defer stat.Close()
     _, err = stat.Exec(u.Id)
     if err != nil {
-        log.Print("Exec sql failed.", u.Id, stat)
         return err
     }
     return nil
@@ -68,7 +63,6 @@ func (u *User) CheckLogin(token string) (bool, error) {
     var code string
     err := stat.QueryRow(&code)
     if err != nil {
-        log.Print("Query sql failed.", u.Id, token, stat)
         return false, err
     }
 
