@@ -35,6 +35,8 @@ func prepareViews(m *martini.ClassicMartini, config *Configs) {
 
 func prepareModels(m *martini.ClassicMartini, config *Configs) {
     orm.RegisterModel(new(User))
+    orm.RegisterModel(new(Tweet))
+    orm.RegisterModel(new(TweetComment))
 }
 
 func Build(config *Configs) (*martini.ClassicMartini) {
