@@ -92,7 +92,12 @@ func getUserProfile(params martini.Params, r render.Render) {
                Error(fmt.Sprintf("User %d not exists", id)))
         return
     }
-    r.JSON(http.StatusOK, user.Censor())
+    rv, err := user.Censor()
+    if err != nil {
+        log.Fatal("User censor failed.", err, id)
+    }
+
+    r.JSON(http.StatusOK, rv)
 }
 
 func updateUserProfile(req *http.Request, params martini.Params, r render.Render) {

@@ -76,12 +76,23 @@ func (u *User) CheckLogin(token string) (bool, error) {
 }
 
 // Hide some secret field.
-func (u User) Censor() (map[string]interface{}) {
-    return map[string]interface{} {
+func (u User) Censor() (TypeModel, error) {
+    return TypeModel {
         "Id": u.Id,
         "Name": u.Name,
         "Avatar": u.Avatar,
         "CreatedAt": u.CreatedAt,
         "UpdatedAt": u.UpdatedAt,
+    }, nil
+}
+
+func GetUserById(id int) (user *User, err error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("SELECT * FROM `user` WHERE `id` = ?", id)
+    err = stat.QueryRow(&user)
+    if err != nil {
+        return nil, err
     }
+    return user, nil
 }
