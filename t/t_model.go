@@ -13,6 +13,10 @@ type Tweet struct {
     CreatedAt time.Time `orm:"auto_now_add;type(datetime)"`
 }
 
+func (*Tweet) TableName() (string) {
+    return "t"
+}
+
 func (t *Tweet) Censor() (TypeModel, error) {
     user, err := t.GetUser()
     if err != nil {
@@ -200,6 +204,10 @@ type TweetComment struct {
     UserId int
     Content string `orm:"size(5000)"`
     CreatedAt time.Time `orm:"auto_now_add";type(datetime)`
+}
+
+func (*TweetComment) TableName() (string) {
+    return "t_comment"
 }
 
 func (c *TweetComment) Censor() (TypeModel, error) {
