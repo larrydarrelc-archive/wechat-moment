@@ -161,33 +161,28 @@ func LoginRequired(req *http.Request, c martini.Context, r render.Render) {
         r.JSON(http.StatusUnauthorized, Error("Login required."))
     }
 
-    id, err := strconv.Atoi(req.Header.Get("X-ID"))
+    login := req.Header.Get("X-LOGIN")
+    token := req.Header.Get("X-TOKEN")
+
+    var user *User
+    user, err := GetUserByLogin(login)
     if err != nil {
-        log.Print("X-ID cannot be parsed into `int`.", req.Header.Get("X-ID"), err)
+        log.Print("Get user failed.", login, token, err)
         banAccess()
         return
     }
-    token := req.Header.Get("X-TOKEN")
-
-    user := User{Id: id}
     ok, err := user.CheckLogin(token)
     if err != nil {
-        log.Print("User check login failed.", id, token, err)
+        log.Print("User check login failed.", login, token, err)
         banAccess()
         return
     }
     if !ok {
-        log.Print("User login failed.", id, token)
+        log.Print("User login failed.", login, token)
         banAccess()
         return
     }
 
     // Map logined user into request context.
-    err = orm.NewOrm().Read(&user)
-    if err != nil {
-        log.Print("Read user failed.", id, err)
-        banAccess()
-        return
-    }
-    c.Map(&user)
+    c.Map(user)
 }

@@ -18,7 +18,7 @@ test_user = {
 }
 
 test_header = {
-    'X-ID': 1,
+    'X-LOGIN': 'testLogin',
     'X-TOKEN': None
 }
 

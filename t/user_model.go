@@ -98,3 +98,14 @@ func GetUserById(id int) (user *User, err error) {
     }
     return user, nil
 }
+
+func GetUserByLogin(login string) (user *User, err error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("SELECT * FROM `user` WHERE `login` = ?", login)
+    err = stat.QueryRow(&user)
+    if err != nil {
+        return nil, err
+    }
+    return user, nil
+}
