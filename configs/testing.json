@@ -2,5 +2,10 @@
     "Db": "data/data.test.sqlite3",
     
     "Port": 5679,
-    "Host": "127.0.0.1"
+    "Host": "127.0.0.1",
+
+    "Static": {
+        "Directory": "static",
+        "Prefix": "/static"
+    }
 }

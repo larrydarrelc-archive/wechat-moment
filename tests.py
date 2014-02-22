@@ -120,6 +120,18 @@ class UserTest(unittest.TestCase):
         rv = requests.get(scope_url('user/me'))
         self.assertEqual(401, rv.status_code)
 
+    def testUploadAvatar(self):
+        rv = requests.post(scope_url('user/avatar'), headers=test_header)
+        self.assertEqual(403, rv.status_code)
+
+        rv = requests.post(scope_url('user/avatar'), headers=test_header,
+                           files={'not-avatar': open(__file__, 'rb')})
+        self.assertEqual(403, rv.status_code)
+
+        rv = requests.post(scope_url('user/avatar'), headers=test_header,
+                           files={'avatar': open(__file__, 'rb')})
+        self.assertEqual(204, rv.status_code)
+
 
 class TweetTest(unittest.TestCase):
 
