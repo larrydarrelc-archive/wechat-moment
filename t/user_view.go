@@ -20,8 +20,15 @@ import (
 //  /user/me        GET     Get current user's profile.
 //  /user/:id       GET     Get user `/:id`'s profile.
 func UserRoute(m *Application) {
+    avatarUploader := UploadProvider(
+        fmt.Sprintf("%s/avatar", m.config.Static.Directory),
+        fmt.Sprintf("%s/avatar", m.config.Static.Prefix),
+        "medium-",
+    )
+
     m.Post("/user", createUser)
     m.Put("/user", LoginRequired, updateUserProfile)
+    m.Post("/user/avatar", LoginRequired, avatarUploader, updateUserAvatar)
     m.Post("/user/login", loginUser)
     m.Get("/user/logout", LoginRequired, logoutUser)
 
@@ -123,6 +130,32 @@ func updateUserProfile(user *User, req *http.Request, r render.Render) {
     if err != nil {
         log.Print("Update user profile failed.", user.Id, err)
         r.JSON(http.StatusForbidden, Error("Update user profile failed."))
+        return
+    }
+    r.JSON(http.StatusNoContent, "")
+}
+
+func updateUserAvatar(user *User,
+                      req *http.Request,
+                      r render.Render,
+                      u *Uploader) {
+    avatar, _, err := req.FormFile("avatar")
+    if err != nil {
+        log.Print("Read upload file failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("You should upload an image."))
+        return
+    }
+    defer avatar.Close()
+
+    path, err := u.Store(avatar)
+    if err != nil {
+        log.Print("Store uploaded file failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Update avatar failed."))
+        return
+    }
+    if err = user.SetAvatar(path); err != nil {
+        log.Print("Set avatar failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Update avatar failed."))
         return
     }
     r.JSON(http.StatusNoContent, "")

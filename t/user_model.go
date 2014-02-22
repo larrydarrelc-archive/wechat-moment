@@ -69,6 +69,14 @@ func (u *User) CheckLogin(token string) (bool, error) {
     return code == token, nil
 }
 
+func (u *User) SetAvatar(path string) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("UPDATE `user` SET `avatar` = ? WHERE `id` = ?", path, u.Id)
+    _, err := stat.Exec()
+    return err
+}
+
 // Hide some secret field.
 func (u User) Censor() (TypeModel, error) {
     return TypeModel {
