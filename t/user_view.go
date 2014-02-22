@@ -100,6 +100,8 @@ func getUserProfile(params martini.Params, r render.Render) {
     rv, err := user.Censor()
     if err != nil {
         log.Print("User censor failed.", err, id)
+        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        return
     }
 
     r.JSON(http.StatusOK, rv)
