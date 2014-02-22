@@ -50,10 +50,13 @@ func (t *Tweet) Censor() (TypeModel, error) {
     }, nil
 }
 
-func (*Tweet) All() (rv []TypeModel, err error) {
+func (*Tweet) All() (rv TypeModel, err error) {
     o := orm.NewOrm()
 
-    var tweets []Tweet
+    var (
+        tweets []Tweet
+        censored []TypeModel
+    )
     stat := o.Raw("SELECT * FROM `t` ORDER BY `t`.`created_at` DESC")
     _, err = stat.QueryRows(&tweets)
     if err != nil {
@@ -64,10 +67,10 @@ func (*Tweet) All() (rv []TypeModel, err error) {
         if err != nil {
             return nil, err
         }
-        rv = append(rv, r)
+        censored = append(censored, r)
     }
 
-    return rv, nil
+    return TypeModel{"t": censored}, nil
 }
 
 func (t *Tweet) GetUser() (TypeModel, error) {

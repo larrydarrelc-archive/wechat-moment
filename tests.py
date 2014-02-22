@@ -126,6 +126,9 @@ class TweetTest(unittest.TestCase):
     def testGetTimeline(self):
         rv = requests.get(scope_url('t'), headers=test_header)
         self.assertEqual(200, rv.status_code)
+        j = rv.json()
+        self.assertIsInstance(j, dict)
+        self.assertIsInstance(j['t'], list)
 
         rv = requests.get(scope_url('t'))
         self.assertEqual(401, rv.status_code)
