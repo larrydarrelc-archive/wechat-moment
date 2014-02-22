@@ -110,6 +110,16 @@ class UserTest(unittest.TestCase):
         # Login again for later test.
         test_header['X-TOKEN'] = login_user()
 
+    def testSelfProfile(self):
+        rv = requests.get(scope_url('user/me'), headers=test_header)
+        self.assertEqual(200, rv.status_code)
+        j = rv.json()
+        self.assertEqual(test_user['name'], j['Name'])
+        self.assertNotIn('Password', j.keys())
+
+        rv = requests.get(scope_url('user/me'))
+        self.assertEqual(401, rv.status_code)
+
 
 class TweetTest(unittest.TestCase):
 

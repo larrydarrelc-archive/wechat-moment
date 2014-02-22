@@ -17,6 +17,7 @@ import (
 //  /user           PUT     Update user's profile.
 //  /user/login     POST    Login a user.
 //  /user/logout    GET     Logout a user.
+//  /user/me        GET     Get current user's profile.
 //  /user/:id       GET     Get user `/:id`'s profile.
 func UserRoute(m *martini.ClassicMartini) {
     m.Post("/user", createUser)
@@ -24,6 +25,7 @@ func UserRoute(m *martini.ClassicMartini) {
     m.Post("/user/login", loginUser)
     m.Get("/user/logout", LoginRequired, logoutUser)
 
+    m.Get("/user/me", LoginRequired, getSelfProfile)
     m.Get("/user/:id", LoginRequired, getUserProfile)
 }
 
@@ -100,6 +102,16 @@ func getUserProfile(params martini.Params, r render.Render) {
         log.Print("User censor failed.", err, id)
     }
 
+    r.JSON(http.StatusOK, rv)
+}
+
+func getSelfProfile(u *User, r render.Render) {
+    rv, err := u.Censor()
+    if err != nil {
+        log.Print("User censor failed.", err, u.Id)
+        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        return
+    }
     r.JSON(http.StatusOK, rv)
 }
 
