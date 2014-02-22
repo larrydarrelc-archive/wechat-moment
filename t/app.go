@@ -8,8 +8,14 @@ import (
     "github.com/codegangsta/martini-contrib/render"
 )
 
-func prepareDatabase(m *martini.ClassicMartini, config *Configs) {
-    dbPath := config.Db
+type Application struct {
+    *martini.Martini
+    martini.Router
+    config *Configs
+}
+
+func (app *Application) prepareDatabase() {
+    dbPath := app.config.Db
     if dbPath == "" {
         dbPath = ":memory:"
     } else {
@@ -19,33 +25,38 @@ func prepareDatabase(m *martini.ClassicMartini, config *Configs) {
     orm.RegisterDataBase("default", "sqlite3", dbPath)
 }
 
-func prepareMiddlewares(m *martini.ClassicMartini, config *Configs) {
-    m.Use(render.Renderer())
-    m.Use(martini.Recovery())
+func (app *Application) prepareMiddlewares() {
+    app.Use(martini.Logger())
+    app.Use(martini.Static("public"))
+    app.Use(render.Renderer())
+    app.Use(martini.Recovery())
 }
 
-func prepareViews(m *martini.ClassicMartini, config *Configs) {
-    m.Get("/", Nop)
+func (app *Application) prepareViews() {
+    app.Get("/", Nop)
 
-    m.Get("/poll", Nop)
+    app.Get("/poll", Nop)
 
-    UserRoute(m)
-    TRoute(m)
+    UserRoute(app)
+    TRoute(app)
 }
 
-func prepareModels(m *martini.ClassicMartini, config *Configs) {
+func (app *Application) prepareModels() {
     orm.RegisterModel(new(User))
     orm.RegisterModel(new(Tweet))
     orm.RegisterModel(new(TweetComment))
 }
 
-func Build(config *Configs) (*martini.ClassicMartini) {
-    m := martini.Classic()
+func Build(config *Configs) (*Application) {
+    m := martini.New()
+    r := martini.NewRouter()
+    m.Action(r.Handle)
+    app := &Application{m, r, config}
 
-    prepareDatabase(m, config)
-    prepareModels(m, config)
-    prepareMiddlewares(m, config)
-    prepareViews(m, config)
+    app.prepareDatabase()
+    app.prepareModels()
+    app.prepareMiddlewares()
+    app.prepareViews()
 
-    return m
+    return app
 }

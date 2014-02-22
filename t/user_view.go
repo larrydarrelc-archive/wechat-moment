@@ -19,7 +19,7 @@ import (
 //  /user/logout    GET     Logout a user.
 //  /user/me        GET     Get current user's profile.
 //  /user/:id       GET     Get user `/:id`'s profile.
-func UserRoute(m *martini.ClassicMartini) {
+func UserRoute(m *Application) {
     m.Post("/user", createUser)
     m.Put("/user", LoginRequired, updateUserProfile)
     m.Post("/user/login", loginUser)

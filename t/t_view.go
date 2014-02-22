@@ -18,7 +18,7 @@ import (
 //  /t/:id          DELETE  Delete a status.
 //  /t/:id/like     PUT     Like a status
 //  /t/:id/comment  POST    Create a comment for status `:id`
-func TRoute(m *martini.ClassicMartini) {
+func TRoute(m *Application) {
     m.Get("/t", LoginRequired, getTimeline)
     m.Post("/t", LoginRequired, createTweet)
 
