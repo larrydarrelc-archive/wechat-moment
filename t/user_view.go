@@ -14,7 +14,9 @@ import (
 //
 //  Path            Method  Description
 //  /user           POST    Create a user.
-//  /user           PUT     Update user's profile.
+//  /user           PUT     Update current user's profile.
+//  /user/avatar    POST    Update current user's avatar.
+//  /user/password  PUT     Update current user's password.
 //  /user/login     POST    Login a user.
 //  /user/logout    GET     Logout a user.
 //  /user/me        GET     Get current user's profile.
@@ -29,6 +31,7 @@ func UserRoute(m *Application) {
     m.Post("/user", createUser)
     m.Put("/user", LoginRequired, updateUserProfile)
     m.Post("/user/avatar", LoginRequired, avatarUploader, updateUserAvatar)
+    m.Put("/user/password", LoginRequired, updateUserPassword)
     m.Post("/user/login", loginUser)
     m.Get("/user/logout", LoginRequired, logoutUser)
 
@@ -175,6 +178,38 @@ func updateUserAvatar(user *User,
         r.JSON(http.StatusForbidden, Error("Update avatar failed."))
         return
     }
+    r.JSON(http.StatusNoContent, "")
+}
+
+func updateUserPassword(user *User, req *http.Request, r render.Render) {
+    oldPassword := req.FormValue("oldPassword")
+    newPassword := req.FormValue("newPassword")
+
+    if user.HashPassword(oldPassword) != user.Password {
+        r.JSON(http.StatusForbidden, Error("Original password is incorrect."))
+        return
+    }
+
+    // TODO remove magic number
+    if len(newPassword) < 5 {
+        r.JSON(http.StatusForbidden,
+               Error(fmt.Sprintf("Password aleast 5 character.")))
+        return
+    }
+
+    o := orm.NewOrm()
+    user.Password = user.HashPassword(newPassword)
+    if _, err := o.Update(user); err != nil {
+        log.Print("Update user password failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Update password failed."))
+        return
+    }
+    if err := user.DoLogout(); err != nil {
+        log.Print("Logout user failed.", user.Id, err)
+        r.JSON(http.StatusForbidden, Error("Update password failed."))
+        return
+    }
+
     r.JSON(http.StatusNoContent, "")
 }
 

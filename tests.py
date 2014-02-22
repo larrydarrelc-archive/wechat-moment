@@ -134,6 +134,36 @@ class UserTest(unittest.TestCase):
                            files={'avatar': open(__file__, 'rb')})
         self.assertEqual(204, rv.status_code)
 
+    def testUpdatePassword(self):
+        origin = test_user['password']
+        test_user['password'] = 'newPassword'
+        payload = dict(oldPassword=origin, newPassword=test_user['password'])
+
+        rv = requests.put(scope_url('user/password'), headers=test_header,
+                          data=payload)
+        self.assertEqual(204, rv.status_code)
+
+        # Relogin user.
+        test_header['X-TOKEN'] = login_user()
+
+        rv = requests.put(scope_url('user/password'), headers=test_header,
+                          data=payload)
+        self.assertEqual(403, rv.status_code)
+
+        payload['oldPassword'] = payload['newPassword']
+        payload['newPassword'] = ''
+        rv = requests.put(scope_url('user/password'), headers=test_header,
+                          data=payload)
+        self.assertEqual(403, rv.status_code)
+
+        # Restore the password
+        payload['newPassword'] = origin
+        test_user['password'] = origin
+        rv = requests.put(scope_url('user/password'), headers=test_header,
+                          data=payload)
+        self.assertEqual(204, rv.status_code)
+        test_header['X-TOKEN'] = login_user()
+
 
 class TweetTest(unittest.TestCase):
 
