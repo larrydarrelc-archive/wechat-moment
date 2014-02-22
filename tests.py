@@ -85,6 +85,7 @@ class UserTest(unittest.TestCase):
         j = rv.json()
         self.assertEqual(200, rv.status_code)
         self.assertEqual(1, j["Id"])
+        self.assertIn('t', j.keys())
         #self.assertIn('Comments', j)
 
         rv = requests.get(scope_url('user/1'), headers={})
@@ -116,6 +117,7 @@ class UserTest(unittest.TestCase):
         j = rv.json()
         self.assertEqual(test_user['name'], j['Name'])
         self.assertNotIn('Password', j.keys())
+        self.assertIn('t', j.keys())
 
         rv = requests.get(scope_url('user/me'))
         self.assertEqual(401, rv.status_code)

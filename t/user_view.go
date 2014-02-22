@@ -111,6 +111,14 @@ func getUserProfile(params martini.Params, r render.Render) {
         return
     }
 
+    tweets, err := user.GetTweets()
+    if err != nil {
+        log.Print("Get user tweets failed.", err, id)
+        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        return
+    }
+    rv["t"] = tweets
+
     r.JSON(http.StatusOK, rv)
 }
 
@@ -121,6 +129,15 @@ func getSelfProfile(u *User, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
     }
+
+    tweets, err := u.GetTweets()
+    if err != nil {
+        log.Print("Get user tweets failed.", err, u.Id)
+        r.JSON(http.StatusForbidden, Error("Read user profile failed."))
+        return
+    }
+    rv["t"] = tweets
+
     r.JSON(http.StatusOK, rv)
 }
 

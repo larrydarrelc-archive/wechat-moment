@@ -77,6 +77,43 @@ func (u *User) SetAvatar(path string) (error) {
     return err
 }
 
+func (u *User) UpdateProfile(name string) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("UPDATE `user` SET `name` = ? WHERE `id` = ?", name, u.Id)
+    _, err := stat.Exec()
+    return err
+}
+
+func (u *User) GetTweets() (rv []TypeModel, err error) {
+    o := orm.NewOrm()
+
+    var ids []int
+    stat := o.Raw("SELECT `id` FROM `t` WHERE `user_id` = ?", u.Id)
+    _, err = stat.QueryRows(&ids)
+    if err != nil {
+        if err == orm.ErrNoRows {
+            return nil, nil
+        }
+        return nil, err
+    }
+
+    for i := range ids {
+        tweet, err := GetTweetById(ids[i])
+        if err != nil {
+            return nil, err
+        }
+        // XXX Don't call `GetTweets` in tweet.Censor.
+        censored, err := tweet.Censor()
+        if err != nil {
+            return nil, err
+        }
+        rv = append(rv, censored)
+    }
+
+    return rv, nil
+}
+
 // Hide some secret field.
 func (u User) Censor() (TypeModel, error) {
     return TypeModel {
@@ -86,14 +123,6 @@ func (u User) Censor() (TypeModel, error) {
         "CreatedAt": u.CreatedAt,
         "UpdatedAt": u.UpdatedAt,
     }, nil
-}
-
-func (u *User) UpdateProfile(name string) (error) {
-    o := orm.NewOrm()
-
-    stat := o.Raw("UPDATE `user` SET `name` = ? WHERE `id` = ?", name, u.Id)
-    _, err := stat.Exec()
-    return err
 }
 
 func GetUserById(id int) (user *User, err error) {
