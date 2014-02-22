@@ -2,6 +2,7 @@ package t
 
 import (
     "log"
+    "fmt"
     "strconv"
     "net/http"
     "github.com/codegangsta/martini"
@@ -19,8 +20,14 @@ import (
 //  /t/:id/like     PUT     Like a status
 //  /t/:id/comment  POST    Create a comment for status `:id`
 func TRoute(m *Application) {
+    imageUploader := UploadProvider(
+        fmt.Sprintf("%s/images", m.config.Static.Directory),
+        fmt.Sprintf("%s/images", m.config.Static.Prefix),
+        "medium-",
+    )
+
     m.Get("/t", LoginRequired, getTimeline)
-    m.Post("/t", LoginRequired, createTweet)
+    m.Post("/t", LoginRequired, imageUploader, createTweet)
 
     m.Get("/t/:id", thisTweet, getTweet)
     m.Delete("/t/:id", LoginRequired, thisTweet, deleteTweet)
@@ -53,11 +60,18 @@ func getTweet(t *Tweet, r render.Render) {
     r.JSON(http.StatusOK, tweet)
 }
 
-func createTweet(req *http.Request, u *User, r render.Render) {
+func createTweet(req *http.Request,
+                 u *User,
+                 r render.Render,
+                 uploader *Uploader) {
+    image, _, uploadErr := req.FormFile("image")
     text := req.FormValue("text")
-    if text == "" {
-        log.Print("Tweet text validate failed.", u.Id)
-        r.JSON(http.StatusForbidden, Error("Text cannot be empty."))
+
+    // Image & text should aleast provide one.
+    if uploadErr != nil && text == "" {
+        log.Print("Tweet validation failed.", u.Id, uploadErr)
+        r.JSON(http.StatusForbidden,
+               Error("You should aleast upload an image or a non empty text."))
         return
     }
 
@@ -68,17 +82,29 @@ func createTweet(req *http.Request, u *User, r render.Render) {
         return
     }
 
-    o := orm.NewOrm()
     tweet := Tweet {UserId: u.Id, Text: text}
+
+    // Image provided.
+    if image != nil {
+        imagePath, err := uploader.Store(image)
+        if err != nil {
+            log.Print("Store image failed.", u.Id, err)
+            r.JSON(http.StatusForbidden, Error("Tweet create failed."))
+            return
+        }
+        tweet.Image = imagePath
+    }
+
+    o := orm.NewOrm()
     _, err := o.Insert(&tweet)
     if err != nil {
-        log.Print("Tweet create failed.", u.Id, text, err)
+        log.Print("Tweet create failed.", u.Id, err)
         r.JSON(http.StatusForbidden, Error("Tweet create failed."))
         return
     }
     rv, err := tweet.Censor()
     if err != nil {
-        log.Print("Tweet create failed.", u.Id, text, err)
+        log.Print("Tweet create failed.", u.Id, err)
         r.JSON(http.StatusForbidden, Error("Tweet create failed."))
         return
     }

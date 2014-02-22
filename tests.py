@@ -164,6 +164,18 @@ class TweetTest(unittest.TestCase):
                            data=test_tweet)
         self.assertEqual(403, rv.status_code)
 
+        rv = requests.post(scope_url('t'), headers=test_header,
+                           files=dict(image=open(__file__, 'rb')))
+        self.assertEqual(201, rv.status_code)
+
+        rv = requests.post(scope_url('t'), headers=test_header,
+                           data=test_tweet,
+                           files=dict(image=open(__file__, 'rb')))
+        self.assertEqual(201, rv.status_code)
+
+        rv = requests.post(scope_url('t'), headers=test_header)
+        self.assertEqual(403, rv.status_code)
+
     def testDeleteTweet(self):
         id = create_tweet()
         dest = scope_url('t/%d' % (id))
