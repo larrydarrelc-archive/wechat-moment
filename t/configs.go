@@ -11,6 +11,10 @@ type Configs struct {
     Db string
     Port int
     Host string
+    Static struct {
+        Directory string
+        Prefix string
+    }
 }
 
 func ReadConfigs(path string) (configs *Configs) {

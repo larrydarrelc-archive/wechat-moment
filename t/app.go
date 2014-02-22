@@ -26,8 +26,16 @@ func (app *Application) prepareDatabase() {
 }
 
 func (app *Application) prepareMiddlewares() {
+    if app.config.Static.Directory != "" {
+        app.Use(martini.Static(
+            app.config.Static.Directory,
+            martini.StaticOptions{
+                Prefix: app.config.Static.Prefix,
+                SkipLogging: true,
+            }),
+        )
+    }
     app.Use(martini.Logger())
-    app.Use(martini.Static("public"))
     app.Use(render.Renderer())
     app.Use(martini.Recovery())
 }
