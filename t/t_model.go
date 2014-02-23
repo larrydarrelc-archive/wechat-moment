@@ -26,6 +26,9 @@ func (t *Tweet) Censor() (TypeModel, error) {
     if err != nil {
         return nil, err
     }
+    if likes == nil {
+        likes = []TypeModel{}
+    }
     c, err := GetCommentsByTweetId(t.Id)
     if err != nil {
         return nil, err
@@ -37,6 +40,9 @@ func (t *Tweet) Censor() (TypeModel, error) {
             return nil, err
         }
         comments = append(comments, t)
+    }
+    if comments == nil {
+        comments = []TypeModel{}
     }
 
     return TypeModel {
@@ -68,6 +74,9 @@ func (*Tweet) All() (rv TypeModel, err error) {
             return nil, err
         }
         censored = append(censored, r)
+    }
+    if censored == nil {
+        censored = []TypeModel{}
     }
 
     return TypeModel{"t": censored}, nil

@@ -110,6 +110,9 @@ func (u *User) GetTweets() (rv []TypeModel, err error) {
         }
         rv = append(rv, censored)
     }
+    if rv == nil {
+        rv = []TypeModel{}
+    }
 
     return rv, nil
 }

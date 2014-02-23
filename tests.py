@@ -84,8 +84,9 @@ class UserTest(unittest.TestCase):
         rv = requests.get(scope_url('user/1'), headers=test_header)
         j = rv.json()
         self.assertEqual(200, rv.status_code)
-        self.assertEqual(1, j["Id"])
+        self.assertEqual(1, j['Id'])
         self.assertIn('t', j.keys())
+        self.assertIsInstance(j['t'], list)
         #self.assertIn('Comments', j)
 
         rv = requests.get(scope_url('user/1'), headers={})
@@ -190,6 +191,8 @@ class TweetTest(unittest.TestCase):
         rv = requests.get(scope_url('t/%d' % (id)), headers=test_header)
         self.assertEqual(200, rv.status_code)
         self.assertEqual(j['Text'], rv.json()['Text'])
+        self.assertIsInstance(j['Comments'], list)
+        self.assertIsInstance(j['Likes'], list)
 
         test_tweet['text'] = ''
         rv = requests.post(scope_url('t'), headers=test_header,
@@ -228,7 +231,6 @@ class TweetTest(unittest.TestCase):
         rv = requests.put(dest, headers=test_header)
         self.assertEqual(204, rv.status_code)
         rv = requests.get(scope_url('t/%d' % (id)), headers=test_header)
-        self.assertIsNone(rv.json()['Likes'])
 
     def testCreateComment(self):
         test_comment = {
