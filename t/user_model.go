@@ -118,6 +118,16 @@ func (u *User) GetTweets() (rv []TypeModel, err error) {
 }
 
 func (u *User) GetTimeline() (rv TypeModel, err error) {
+    buildQuery := func (items []int) (string) {
+        var strIds []string
+
+        for i := range items {
+            strIds = append(strIds, fmt.Sprintf("`user_id` = %d", items[i]))
+        }
+
+        return Delim(" OR ").Join(strIds)
+    }
+
     o := orm.NewOrm()
 
     authorIds, err := u.GetFriendIds()
@@ -132,8 +142,14 @@ func (u *User) GetTimeline() (rv TypeModel, err error) {
         tweets []Tweet
         timeline []TypeModel
     )
-    stat := o.Raw("SELECT * FROM `t` WHERE `user_id` IN ?", authorIds)
-    _, err = stat.QueryRows(&tweets)
+
+    // XXX Remove sql concating.
+    stat := o.Raw(fmt.Sprintf("SELECT * FROM `t` WHERE %s", buildQuery(authorIds)))
+    r, err := stat.QueryRows(&tweets)
+    print(r)
+    if err != nil {
+        panic(err)
+    }
 
     for i := range tweets {
         censored, err := tweets[i].Censor()

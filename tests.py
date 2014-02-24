@@ -214,11 +214,14 @@ class TweetTest(unittest.TestCase):
         friendIds = [i['Id'] for i in rv.json()['Friends']]
         friendIds.append(1)
 
+        create_tweet()
+
         rv = requests.get(scope_url('t'), headers=test_header)
         self.assertEqual(200, rv.status_code)
         j = rv.json()
         self.assertIsInstance(j, dict)
         self.assertIsInstance(j['t'], list)
+        self.assertGreater(len(j['t']), 0)
 
         # Should only contains friends & user's tweets.
         for t in j['t']:
