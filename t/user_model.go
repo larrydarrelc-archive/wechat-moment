@@ -117,6 +117,78 @@ func (u *User) GetTweets() (rv []TypeModel, err error) {
     return rv, nil
 }
 
+func (u *User) AddFriend(friend *User) (error) {
+    hasFriend, err := u.HasFriend(friend)
+    if err != nil || hasFriend {
+        return err
+    }
+
+    o := orm.NewOrm()
+    stat := o.Raw("INSERT INTO `user_friend` (`user_a_id`, `user_b_id`) VALUES (?, ?)", u.Id, friend.Id)
+    _, err = stat.Exec()
+    if err != nil {
+        return err;
+    }
+
+    return friend.AddFriend(u)
+}
+
+func (u *User) RemoveFriend(friend *User) (error) {
+    o := orm.NewOrm()
+
+    stat := o.Raw("DELETE FROM `user_friend` WHERE `user_a_id` = ? AND `user_b_id` = ?", u.Id, friend.Id)
+    _, err := stat.Exec()
+    if err != nil {
+        return err
+    }
+
+    stat = o.Raw("DELETE FROM `user_friend` WHERE `user_a_id` = ? AND `user_b_id` = ?", friend.Id, u.Id)
+    _, err = stat.Exec()
+
+    return err
+}
+
+func (u *User) HasFriend(friend *User) (bool, error) {
+    o := orm.NewOrm()
+
+    var count int
+    stat := o.Raw("SELECT COUNT(*) FROM `user_friend` WHERE `user_a_id` = ? AND `user_b_id` = ?", u.Id, friend.Id)
+    err := stat.QueryRow(&count)
+    if err != nil {
+        return false, err
+    }
+
+    return count > 0, nil
+}
+
+func (u *User) GetFriends() (rv []TypeModel, err error) {
+    o := orm.NewOrm()
+
+    var friendIds []int
+    stat := o.Raw("SELECT `user_b_id` FROM `user_friend` WHERE `user_a_id` = ?", u.Id)
+    _, err = stat.QueryRows(&friendIds)
+    if err != nil && err != orm.ErrNoRows {
+        if err == orm.ErrNoRows {
+            return nil, nil
+        }
+        return nil, err
+    }
+
+    for i := range friendIds {
+        friend, err := GetUserById(friendIds[i])
+        if err != nil {
+            return nil, err
+        }
+        censored, err := friend.Censor()
+        if err != nil {
+            return nil, err
+        }
+        rv = append(rv, censored)
+    }
+
+    return
+}
+
 // Hide some secret field.
 func (u User) Censor() (TypeModel, error) {
     return TypeModel {

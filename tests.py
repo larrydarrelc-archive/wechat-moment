@@ -31,11 +31,13 @@ def scope_url(scope):
     return '%s/%s' % (base_url, scope)
 
 
-def create_user():
+def create_user(user_profile=None):
     '''Create test user.'''
-    rv = requests.post(scope_url('user'), data=test_user)
+    user_profile = user_profile or test_user
+    rv = requests.post(scope_url('user'), data=user_profile)
     if not rv.ok:
         raise Exception('Create user failed.')
+    return rv.json()
 
 
 def login_user():
@@ -164,6 +166,45 @@ class UserTest(unittest.TestCase):
                           data=payload)
         self.assertEqual(204, rv.status_code)
         test_header['X-TOKEN'] = login_user()
+
+    def testFriend(self):
+        new_user = create_user({
+            'name': 'new',
+            'password': 'newpassword',
+            'login': 'new'
+        })
+
+        # Add a friend.
+        rv = requests.put(scope_url('user/friend/%d' % (new_user['Id'])),
+                          headers=test_header)
+        self.assertEqual(204, rv.status_code)
+
+        rv = requests.get(scope_url('user/me'), headers=test_header)
+        r = rv.json()
+        self.assertIsInstance(r['Friends'], list)
+        self.assertIn(new_user['Id'], [i['Id'] for i in r['Friends']])
+
+        rv = requests.get(scope_url('user/%d' % (new_user['Id'])),
+                          headers=test_header)
+        r = rv.json()
+        self.assertIsInstance(r['Friends'], list)
+        self.assertIn(1, [i['Id'] for i in r['Friends']])
+
+        # Remove a friend.
+        rv = requests.delete(scope_url('user/friend/%d' % (new_user['Id'])),
+                             headers=test_header)
+        self.assertEqual(204, rv.status_code)
+
+        rv = requests.get(scope_url('user/me'), headers=test_header)
+        r = rv.json()
+        self.assertIsInstance(r['Friends'], list)
+        self.assertNotIn(new_user['Id'], [i['Id'] for i in r['Friends']])
+
+        rv = requests.get(scope_url('user/%d' % (new_user['Id'])),
+                          headers=test_header)
+        r = rv.json()
+        self.assertIsInstance(r['Friends'], list)
+        self.assertNotIn(1, [i['Id'] for i in r['Friends']])
 
 
 class TweetTest(unittest.TestCase):
