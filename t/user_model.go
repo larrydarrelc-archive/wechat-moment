@@ -225,6 +225,9 @@ func (u *User) GetFriends() (rv []TypeModel, err error) {
         }
         rv = append(rv, censored)
     }
+    if rv == nil {
+        rv = []TypeModel{}
+    }
 
     return
 }

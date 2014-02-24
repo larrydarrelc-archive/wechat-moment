@@ -126,9 +126,6 @@ func getUserProfile(params martini.Params, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
     }
-    if tweets == nil {
-        tweets = []TypeModel{}
-    }
     rv["t"] = tweets
 
     friends, err := user.GetFriends()
@@ -136,9 +133,6 @@ func getUserProfile(params martini.Params, r render.Render) {
         log.Print("Get user friends failed.", err, id)
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
-    }
-    if friends == nil {
-        friends = []TypeModel{}
     }
     rv["Friends"] = friends
 
@@ -159,9 +153,6 @@ func getSelfProfile(u *User, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
     }
-    if tweets == nil {
-        tweets = []TypeModel{}
-    }
     rv["t"] = tweets
 
     friends, err := u.GetFriends()
@@ -169,10 +160,6 @@ func getSelfProfile(u *User, r render.Render) {
         log.Print("Get user friends failed.", err, u.Id)
         r.JSON(http.StatusForbidden, Error("Read user profile failed."))
         return
-    }
-    log.Print(friends)
-    if friends == nil {
-        friends = []TypeModel{}
     }
     rv["Friends"] = friends
 
