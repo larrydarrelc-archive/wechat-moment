@@ -37,16 +37,14 @@ func TRoute(m *Application) {
     m.Post("/t/:id/comment", LoginRequired, thisTweet, createTweetComment)
 }
 
-func getTimeline(r render.Render) {
-    var tweet Tweet
-
-    tweets, err := tweet.All()
+func getTimeline(u *User, r render.Render) {
+    timeline, err := u.GetTimeline()
     if err != nil {
-        log.Print("Read all tweets failed.", err)
+        log.Print("Read timeline failed.", u.Id, err)
         r.JSON(http.StatusForbidden, Error("Read timeline failed."))
         return
     }
-    r.JSON(http.StatusOK, tweets)
+    r.JSON(http.StatusOK, timeline)
 }
 
 func getTweet(t *Tweet, r render.Render) {

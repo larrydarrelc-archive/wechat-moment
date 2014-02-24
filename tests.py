@@ -210,11 +210,19 @@ class UserTest(unittest.TestCase):
 class TweetTest(unittest.TestCase):
 
     def testGetTimeline(self):
+        rv = requests.get(scope_url('user/me'), headers=test_header)
+        friendIds = [i['Id'] for i in rv.json()['Friends']]
+        friendIds.append(1)
+
         rv = requests.get(scope_url('t'), headers=test_header)
         self.assertEqual(200, rv.status_code)
         j = rv.json()
         self.assertIsInstance(j, dict)
         self.assertIsInstance(j['t'], list)
+
+        # Should only contains friends & user's tweets.
+        for t in j['t']:
+            self.assertIn(t['User']['Id'], friendIds)
 
         rv = requests.get(scope_url('t'))
         self.assertEqual(401, rv.status_code)

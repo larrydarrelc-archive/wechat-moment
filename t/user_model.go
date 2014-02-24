@@ -117,6 +117,38 @@ func (u *User) GetTweets() (rv []TypeModel, err error) {
     return rv, nil
 }
 
+func (u *User) GetTimeline() (rv TypeModel, err error) {
+    o := orm.NewOrm()
+
+    authorIds, err := u.GetFriendIds()
+    if err != nil {
+        return nil, err
+    }
+
+    // Include user himself.
+    authorIds = append(authorIds, u.Id)
+
+    var (
+        tweets []Tweet
+        timeline []TypeModel
+    )
+    stat := o.Raw("SELECT * FROM `t` WHERE `user_id` IN ?", authorIds)
+    _, err = stat.QueryRows(&tweets)
+
+    for i := range tweets {
+        censored, err := tweets[i].Censor()
+        if err != nil {
+            return nil, err
+        }
+        timeline = append(timeline, censored)
+    }
+    if timeline == nil {
+        timeline = []TypeModel{}
+    }
+
+    return TypeModel{"t": timeline}, nil
+}
+
 func (u *User) AddFriend(friend *User) (error) {
     hasFriend, err := u.HasFriend(friend)
     if err != nil || hasFriend {
@@ -161,16 +193,24 @@ func (u *User) HasFriend(friend *User) (bool, error) {
     return count > 0, nil
 }
 
-func (u *User) GetFriends() (rv []TypeModel, err error) {
+func (u *User) GetFriendIds() (rv []int, err error) {
     o := orm.NewOrm()
 
-    var friendIds []int
     stat := o.Raw("SELECT `user_b_id` FROM `user_friend` WHERE `user_a_id` = ?", u.Id)
-    _, err = stat.QueryRows(&friendIds)
+    _, err = stat.QueryRows(&rv)
     if err != nil && err != orm.ErrNoRows {
         if err == orm.ErrNoRows {
             return nil, nil
         }
+        return nil, err
+    }
+
+    return
+}
+
+func (u *User) GetFriends() (rv []TypeModel, err error) {
+    friendIds, err := u.GetFriendIds()
+    if err != nil {
         return nil, err
     }
 
