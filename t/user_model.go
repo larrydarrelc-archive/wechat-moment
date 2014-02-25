@@ -145,8 +145,7 @@ func (u *User) GetTimeline() (rv TypeModel, err error) {
 
     // XXX Remove sql concating.
     stat := o.Raw(fmt.Sprintf("SELECT * FROM `t` WHERE %s ORDER BY `created_at` DESC", buildQuery(authorIds)))
-    r, err := stat.QueryRows(&tweets)
-    print(r)
+    _, err := stat.QueryRows(&tweets)
     if err != nil {
         panic(err)
     }
