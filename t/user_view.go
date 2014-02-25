@@ -174,7 +174,7 @@ func updateUserProfile(user *User, req *http.Request, r render.Render) {
         r.JSON(http.StatusForbidden, Error("Update user profile failed."))
         return
     }
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Updated"))
 }
 
 func updateUserAvatar(user *User,
@@ -200,7 +200,7 @@ func updateUserAvatar(user *User,
         r.JSON(http.StatusForbidden, Error("Update avatar failed."))
         return
     }
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Uploaded"))
 }
 
 func updateUserPassword(user *User, req *http.Request, r render.Render) {
@@ -232,7 +232,7 @@ func updateUserPassword(user *User, req *http.Request, r render.Render) {
         return
     }
 
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Updated"))
 }
 
 func loginUser(req *http.Request, r render.Render) {
@@ -288,7 +288,7 @@ func createFriendRelationship(u *User,
         return
     }
 
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Added"))
 }
 
 func removeFriendRelationship(u *User,
@@ -307,7 +307,7 @@ func removeFriendRelationship(u *User,
         return
     }
 
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Removed"))
 }
 
 // Check if the request carry logined token & id.

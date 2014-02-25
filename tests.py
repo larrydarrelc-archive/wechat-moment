@@ -100,7 +100,7 @@ class UserTest(unittest.TestCase):
     def testUpdateUserProfile(self):
         rv = requests.put(scope_url('user'), data=dict(name='test'),
                           headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
         rv = requests.get(scope_url('user/1'), headers=test_header)
         self.assertEqual(200, rv.status_code)
         self.assertEqual('test', rv.json()['Name'])
@@ -135,7 +135,7 @@ class UserTest(unittest.TestCase):
 
         rv = requests.post(scope_url('user/avatar'), headers=test_header,
                            files={'avatar': open(__file__, 'rb')})
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
 
     def testUpdatePassword(self):
         origin = test_user['password']
@@ -144,7 +144,7 @@ class UserTest(unittest.TestCase):
 
         rv = requests.put(scope_url('user/password'), headers=test_header,
                           data=payload)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
 
         # Relogin user.
         test_header['X-TOKEN'] = login_user()
@@ -164,7 +164,7 @@ class UserTest(unittest.TestCase):
         test_user['password'] = origin
         rv = requests.put(scope_url('user/password'), headers=test_header,
                           data=payload)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
         test_header['X-TOKEN'] = login_user()
 
     def testFriend(self):
@@ -177,7 +177,7 @@ class UserTest(unittest.TestCase):
         # Add a friend.
         rv = requests.put(scope_url('user/friend/%s' % ('new')),
                           headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
 
         rv = requests.get(scope_url('user/me'), headers=test_header)
         r = rv.json()
@@ -193,7 +193,7 @@ class UserTest(unittest.TestCase):
         # Remove a friend.
         rv = requests.delete(scope_url('user/friend/%s' % ('new')),
                              headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
 
         rv = requests.get(scope_url('user/me'), headers=test_header)
         r = rv.json()
@@ -267,7 +267,7 @@ class TweetTest(unittest.TestCase):
         id = create_tweet()
         dest = scope_url('t/%d' % (id))
         rv = requests.delete(dest, headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
         rv = requests.get(dest, headers=test_header)
         self.assertEqual(404, rv.status_code)
 
@@ -276,12 +276,12 @@ class TweetTest(unittest.TestCase):
         dest = scope_url('t/%d/like' % (id))
 
         rv = requests.put(dest, headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
         rv = requests.get(scope_url('t/%d' % (id)), headers=test_header)
         self.assertIsNotNone(rv.json()['Likes'])
 
         rv = requests.put(dest, headers=test_header)
-        self.assertEqual(204, rv.status_code)
+        self.assertEqual(202, rv.status_code)
         rv = requests.get(scope_url('t/%d' % (id)), headers=test_header)
 
     def testCreateComment(self):

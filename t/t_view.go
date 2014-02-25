@@ -123,7 +123,7 @@ func deleteTweet(tweet *Tweet, u *User, r render.Render) {
         return
     }
     log.Print("Tweet was deleted.", tweet.Id, u.Id)
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Deleted"))
 }
 
 func likeTweet(tweet *Tweet, u *User, r render.Render) {
@@ -149,7 +149,7 @@ func likeTweet(tweet *Tweet, u *User, r render.Render) {
         log.Print("Tweet was liked.", tweet.Id, u.Id)
     }
 
-    r.JSON(http.StatusNoContent, "")
+    r.JSON(http.StatusAccepted, Success("Liked"))
 }
 
 func createTweetComment(req *http.Request,
