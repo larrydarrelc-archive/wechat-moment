@@ -1,4 +1,4 @@
-.PHONY: setup_test_db setup_test_server run_test deploy
+.PHONY: setup_test_db setup_test_server run_test deploy install
 
 run_test:
 	python2 tests.py
@@ -14,3 +14,13 @@ setup_test_db:
 deploy:
 	mv server server-old
 	mv server-new server
+
+install:
+	export GOPATH=`pwd`
+	rm -rf pkg
+	rm -rf src/github.com/{astaxie,mattn,codegangsta}
+	go get github.com/astaxie/beego/orm
+	go get github.com/mattn/go-sqlite3
+	go get github.com/codegangsta/martini
+	go get github.com/codegangsta/martini-contrib/render
+	go build server.go
