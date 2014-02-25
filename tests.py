@@ -175,7 +175,7 @@ class UserTest(unittest.TestCase):
         })
 
         # Add a friend.
-        rv = requests.put(scope_url('user/friend/%d' % (new_user['Id'])),
+        rv = requests.put(scope_url('user/friend/%s' % ('new')),
                           headers=test_header)
         self.assertEqual(204, rv.status_code)
 
@@ -191,7 +191,7 @@ class UserTest(unittest.TestCase):
         self.assertIn(1, [i['Id'] for i in r['Friends']])
 
         # Remove a friend.
-        rv = requests.delete(scope_url('user/friend/%d' % (new_user['Id'])),
+        rv = requests.delete(scope_url('user/friend/%s' % ('new')),
                              headers=test_header)
         self.assertEqual(204, rv.status_code)
 

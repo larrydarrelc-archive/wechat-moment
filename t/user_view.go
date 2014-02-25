@@ -12,17 +12,17 @@ import (
 
 // Routes:
 //
-//  Path                Method  Description
-//  /user               POST    Create a user.
-//  /user               PUT     Update current user's profile.
-//  /user/avatar        POST    Update current user's avatar.
-//  /user/password      PUT     Update current user's password.
-//  /user/login         POST    Login a user.
-//  /user/logout        GET     Logout a user.
-//  /user/friend/:id    PUT     Create a friend relationship.
-//  /user/friend/:id    DELETE  Delete a friend relationship.
-//  /user/me            GET     Get current user's profile.
-//  /user/:id           GET     Get user `/:id`'s profile.
+//  Path                    Method  Description
+//  /user                   POST    Create a user.
+//  /user                   PUT     Update current user's profile.
+//  /user/avatar            POST    Update current user's avatar.
+//  /user/password          PUT     Update current user's password.
+//  /user/login             POST    Login a user.
+//  /user/logout            GET     Logout a user.
+//  /user/friend/:login     PUT     Create a friend relationship.
+//  /user/friend/:login     DELETE  Delete a friend relationship.
+//  /user/me                GET     Get current user's profile.
+//  /user/:id               GET     Get user `/:id`'s profile.
 func UserRoute(m *Application) {
     avatarUploader := UploadProvider(
         fmt.Sprintf("%s/avatar", m.config.Static.Directory),
@@ -38,8 +38,8 @@ func UserRoute(m *Application) {
     m.Post("/user/avatar", LoginRequired, avatarUploader, updateUserAvatar)
     m.Put("/user/password", LoginRequired, updateUserPassword)
 
-    m.Put("/user/friend/:id", LoginRequired, createFriendRelationship)
-    m.Delete("/user/friend/:id", LoginRequired, removeFriendRelationship)
+    m.Put("/user/friend/:login", LoginRequired, createFriendRelationship)
+    m.Delete("/user/friend/:login", LoginRequired, removeFriendRelationship)
 
     m.Get("/user/me", LoginRequired, getSelfProfile)
     m.Get("/user/:id", LoginRequired, getUserProfile)
@@ -275,22 +275,15 @@ func logoutUser(user *User, r render.Render) {
 func createFriendRelationship(u *User,
                               params martini.Params,
                               r render.Render) {
-    friendId, err := strconv.Atoi(params["id"])
+    friend, err := GetUserByLogin(params["login"])
     if err != nil {
-        log.Print("Cannot parse into `int`.", params["id"], err)
-        r.JSON(http.StatusNotFound, Error("User not found."))
-        return
-    }
-
-    friend, err := GetUserById(friendId)
-    if err != nil {
-        log.Print("Cannot get user.", u.Id, friendId, err)
+        log.Print("Cannot get user.", u.Id, params["login"], err)
         r.JSON(http.StatusNotFound, Error("User not found."))
         return
     }
 
     if err = u.AddFriend(friend); err != nil {
-        log.Print("Add friend failed.", u.Id, friendId, err)
+        log.Print("Add friend failed.", u.Id, params["login"], err)
         r.JSON(http.StatusForbidden, Error("Add friend failed."))
         return
     }
@@ -301,22 +294,15 @@ func createFriendRelationship(u *User,
 func removeFriendRelationship(u *User,
                               params martini.Params,
                               r render.Render) {
-    friendId, err := strconv.Atoi(params["id"])
+    friend, err := GetUserByLogin(params["login"])
     if err != nil {
-        log.Print("Cannot parse into `int`.", params["id"], err)
-        r.JSON(http.StatusNotFound, Error("User not found."))
-        return
-    }
-
-    friend, err := GetUserById(friendId)
-    if err != nil {
-        log.Print("Cannot get user.", u.Id, friendId, err)
+        log.Print("Cannot get user.", u.Id, params["login"], err)
         r.JSON(http.StatusNotFound, Error("User not found."))
         return
     }
 
     if err = u.RemoveFriend(friend); err != nil {
-        log.Print("Remove friend failed.", u.Id, friendId, err)
+        log.Print("Remove friend failed.", u.Id, params["login"], err)
         r.JSON(http.StatusForbidden, Error("Remove friend failed."))
         return
     }
