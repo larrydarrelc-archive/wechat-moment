@@ -88,23 +88,21 @@ func (u *User) UpdateProfile(name string) (error) {
 func (u *User) GetTweets() (rv []TypeModel, err error) {
     o := orm.NewOrm()
 
-    var ids []int
-    stat := o.Raw("SELECT `id` FROM `t` WHERE `user_id` = ?", u.Id)
-    _, err = stat.QueryRows(&ids)
+    var tweets []Tweet
+    stat := o.Raw(
+        "SELECT * FROM `t` WHERE `user_id` = ? ORDER BY `created_at` DESC",
+        u.Id,
+    )
+    _, err = stat.QueryRows(&tweets)
     if err != nil {
         if err == orm.ErrNoRows {
-            return nil, nil
+            return []TypeModel{}, nil
         }
         return nil, err
     }
 
-    for i := range ids {
-        tweet, err := GetTweetById(ids[i])
-        if err != nil {
-            return nil, err
-        }
-        // XXX Don't call `GetTweets` in tweet.Censor.
-        censored, err := tweet.Censor()
+    for i := range tweets {
+        censored, err := tweets[i].Censor()
         if err != nil {
             return nil, err
         }
@@ -144,10 +142,14 @@ func (u *User) GetTimeline() (rv TypeModel, err error) {
     )
 
     // XXX Remove sql concating.
-    stat := o.Raw(fmt.Sprintf("SELECT * FROM `t` WHERE %s ORDER BY `created_at` DESC", buildQuery(authorIds)))
+    raw := fmt.Sprintf(
+        "SELECT * FROM `t` WHERE %s ORDER BY `created_at` DESC",
+        buildQuery(authorIds),
+    )
+    stat := o.Raw(raw)
     _, err = stat.QueryRows(&tweets)
     if err != nil {
-        panic(err)
+        return nil, err
     }
 
     for i := range tweets {
