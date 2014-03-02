@@ -12,17 +12,17 @@ import (
 
 // Routes:
 //
-//  Path                    Method  Description
-//  /user                   POST    Create a user.
-//  /user                   PUT     Update current user's profile.
-//  /user/avatar            POST    Update current user's avatar.
-//  /user/password          PUT     Update current user's password.
-//  /user/login             POST    Login a user.
-//  /user/logout            GET     Logout a user.
-//  /user/friend/:login     PUT     Create a friend relationship.
-//  /user/friend/:login     DELETE  Delete a friend relationship.
-//  /user/me                GET     Get current user's profile.
-//  /user/:id               GET     Get user `/:id`'s profile.
+//  Path                Method  Description
+//  /user               POST    Create a user.
+//  /user               PUT     Update current user's profile.
+//  /user/avatar        POST    Update current user's avatar.
+//  /user/password      PUT     Update current user's password.
+//  /user/login         POST    Login a user.
+//  /user/logout        GET     Logout a user.
+//  /user/friend/:id    PUT     Create a friend relationship.
+//  /user/friend/:id    DELETE  Delete a friend relationship.
+//  /user/me            GET     Get current user's profile.
+//  /user/:id           GET     Get user `/:id`'s profile.
 func UserRoute(m *Application) {
     avatarUploader := UploadProvider(
         fmt.Sprintf("%s/avatar", m.config.Static.Directory),
